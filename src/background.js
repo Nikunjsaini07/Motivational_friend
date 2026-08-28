@@ -4,6 +4,8 @@ const VERSION = '0.3.2';
 const CLOSE_ALARM = 'mf-close-listed';
 const IDLE_ALARM = 'mf-idle-prompt';
 const AUDIO_ALARM = 'mf-audio-retry';
+const POPUP_ALARM = 'mf-popup-retry';
+const POPUP_RETRY_MS = 30000;
 const AUDIO_RETRY_MS = [30000, 60000];
 const MAX_AUDIO_ATTEMPTS = AUDIO_RETRY_MS.length + 1;
 const ALARM = 'mf-session-timer';
@@ -165,6 +167,16 @@ async function repairAudioAlarm(session) {
   }
 }
 
+async function repairPopupAlarm(session) {
+  const when = session?.activeTabId != null ? session.prompt?.popupRetryAt : null;
+  const alarm = await chrome.alarms.get(POPUP_ALARM);
+  if (!when) {
+    if (alarm) await chrome.alarms.clear(POPUP_ALARM);
+  } else if (!alarm || alarm.scheduledTime !== when) {
+    await chrome.alarms.create(POPUP_ALARM, { when });
+  }
+}
+
 // A cue is delivered independently of the popup, including while Chrome is away.
 // Polls repair its alarm but never perform a retry or pretend playback succeeded.
 async function deliverAudio(settings, session, { retry = false } = {}) {
@@ -233,23 +245,34 @@ async function retryAudio() {
   await deliverAudio(settings, session, { retry: true });
 }
 
-// Try the native popup once, plus one focus-return retry if opening failed.
+// Polls never reopen a dismissed popup; its independent alarm handles retries.
 async function deliver(settings, session, context = {}) {
   // Load the popup shell first, then play even when opening failed or was skipped.
   await deliverPopup(session, context);
   await deliverAudio(settings, session);
 }
 
-async function deliverPopup(session, { focused = false, focusReturned = false } = {}) {
+async function deliverPopup(session, { focused = false, focusReturned = false, retryPopup = false } = {}) {
   const prompt = session.prompt;
   await chrome.action.setBadgeBackgroundColor({ color: '#ED857C' });
   await chrome.action.setBadgeText({ text: prompt ? '!' : '' });
-  if (!prompt || session.activeTabId == null) return;
+  if (!prompt || session.activeTabId == null) {
+    await repairPopupAlarm(null);
+    return;
+  }
+  if (!prompt.popupRetryAt) {
+    prompt.popupRetryAt = Date.now() + POPUP_RETRY_MS;
+    await saveSession(session);
+  }
+  await repairPopupAlarm(session);
+  const timedRetry = retryPopup && Date.now() >= prompt.popupRetryAt;
   const focusRetry = focused && focusReturned && prompt.openRetryOnFocus && !prompt.openFocusRetryUsed;
-  if (prompt.openAttempted && !focusRetry) return;
+  if (prompt.openAttempted && !focusRetry && !timedRetry) return;
   if (focusRetry) prompt.openFocusRetryUsed = true;
   prompt.openAttempted = true; // Never steal focus again on each status poll.
+  prompt.popupRetryAt = Date.now() + POPUP_RETRY_MS;
   await saveSession(session);
+  await repairPopupAlarm(session);
   try {
     const tab = await chrome.tabs.get(session.activeTabId);
     await chrome.action.openPopup({ windowId: tab.windowId });
@@ -330,7 +353,7 @@ async function cue(settings, gentle, cueId = 'preview-' + crypto.randomUUID()) {
   }
 }
 
-async function reconcile({ popupTabId = null, focusReturned = false } = {}) {
+async function reconcile({ popupTabId = null, focusReturned = false, retryPopup = false } = {}) {
   const closeJob = await reconcileClosing();
   const { settings, session: previous } = await readState();
   let [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
@@ -365,6 +388,7 @@ async function reconcile({ popupTabId = null, focusReturned = false } = {}) {
     await repairAlarm(null);
     await repairIdleAlarm(null);
     await repairAudioAlarm(null);
+    await repairPopupAlarm(null);
     return { closeJob, settings, session: previous, available: false, unavailableReason, pageLabel, version: VERSION };
   }
   const hostname = domainFrom(tab.url);
@@ -423,7 +447,13 @@ async function reconcile({ popupTabId = null, focusReturned = false } = {}) {
   await saveSession(session);
   await repairAlarm(session);
   await repairIdleAlarm(session);
-  await deliver(settings, session, { focused, focusReturned });
+  // A live, focused popup sends a heartbeat each second. Give the user a full
+  // interval after leaving it, including while editing settings or choosing snooze.
+  if (popupOwnsFocus && session.prompt) {
+    session.prompt.popupRetryAt = Date.now() + POPUP_RETRY_MS;
+    await saveSession(session);
+  }
+  await deliver(settings, session, { focused, focusReturned, retryPopup });
   return { closeJob, settings, session, available: true, unavailableReason: null, pageLabel, version: VERSION };
 }
 
@@ -514,10 +544,12 @@ async function handleMessage(message, sender) {
     if (!current.available || !session?.prompt || session.prompt.id !== message.promptId ||
         session.prompt.kind === 'snooze') return { ok: true, ...current };
     session.prompt.shownAt ||= Date.now();
+    session.prompt.popupRetryAt = Date.now() + POPUP_RETRY_MS;
     session.prompt.openRetryOnFocus = false;
     session.deliveryError = null;
     await saveSession(session);
     await repairIdleAlarm(session);
+    await repairPopupAlarm(session);
     return { ok: true, ...current, cue: session.prompt.cue };
   }
   throw new Error('Unknown request. Reload the extension and refresh this page.');
@@ -527,6 +559,7 @@ const onChange = () => enqueue(reconcile);
 chrome.runtime.onInstalled.addListener(onChange);
 chrome.runtime.onStartup.addListener(onChange);
 chrome.alarms.onAlarm.addListener(alarm => alarm.name === AUDIO_ALARM ? enqueue(retryAudio)
+  : alarm.name === POPUP_ALARM ? enqueue(() => reconcile({ retryPopup: true }))
   : [ALARM, CLOSE_ALARM, IDLE_ALARM].includes(alarm.name) ? onChange() : undefined);
 chrome.tabs.onActivated.addListener(onChange);
 chrome.tabs.onRemoved.addListener(onChange);

@@ -131,9 +131,13 @@ All pages already open at update work without injection; refresh only removes ol
 - **A timer ran late:** Chrome alarms may be delayed, especially while the computer
   is asleep or Chrome is closed. They are not precise real-time timers.
 
-### Planned, not implemented
+### Unanswered reminders
 
-Reopening an unanswered, dismissed popup every **30 seconds** is planned.
-The current version does not continuously reopen dismissed popups. Automatic sound
-retries are separate from this proposed behavior.
+An unanswered popup is retried every **30 seconds** after dismissal, until you
+answer. While the popup is focused, retries are postponed so you can read or edit
+settings. Selecting a timer or snooze stops these retries. The quote and question
+stay the same, apart from the existing listed-site escalation; successful audio
+is not replayed. Browser restrictions can prevent automatic opening, and Chrome
+may delay alarms. The badge remains available for opening the reminder manually.
+Automatic sound retries are separate from popup retries.
 
