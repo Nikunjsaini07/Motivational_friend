@@ -1,0 +1,38 @@
+# Local dependencies and caches
+node_modules/
+.npm/
+.cache/
+
+# Build output and packaged extension releases
+/dist/
+/build/
+/release/
+/releases/
+*.crx
+*.zip
+
+# Test output (keep test source files tracked)
+/coverage/
+/test-results/
+/playwright-report/
+.nyc_output/
+*.log
+
+# Local secrets and extension signing keys
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Editor and operating-system clutter
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~
+
+# Required manifest, source, tests, PNG icons and WAV sounds stay tracked.
