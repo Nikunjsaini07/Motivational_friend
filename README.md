@@ -1,4 +1,4 @@
-# Motivation Friend · 0.3.2
+# Motivation Friend 
 
 A compact, black Chrome extension with a local animated cat, sourced quotations,
 automatic reminders and optional-by-selection tab-closing commitments.
