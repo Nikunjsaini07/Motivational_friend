@@ -1,0 +1,3 @@
+html { color-scheme: dark; background: #101010; }
+body { width: 254px; margin: 0; background: #101010; color: #F3F1ED; }
+body > .mf-widget { border: 0; border-radius: 0; }

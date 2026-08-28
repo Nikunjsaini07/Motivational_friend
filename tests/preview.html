@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Motivation Friend · visual test</title>
+  <link rel="stylesheet" href="../src/ui.css">
+  <link rel="stylesheet" href="preview.css">
+</head>
+<body>
+  <header><p>LOCAL VISUAL TEST · NO EXTENSION INSTALLATION</p><h1>Meet your smaller friend.</h1>
+    <nav aria-label="Preview scenarios">
+      <button data-scenario="listed">Listed check-in</button>
+      <button data-scenario="gentle">Gentle check-in</button>
+      <button data-scenario="yapping">Cute angry</button>
+      <button data-scenario="quiet">Quiet / settings icon</button>
+      <button data-scenario="audio-recovery">Sound recovery</button>
+    </nav>
+    <p class="note">These controls simulate browsing for layout testing. Actual Chrome timers have separate regression tests.</p>
+  </header>
+  <section class="toolbar-sample" aria-label="Toolbar popup preview"><p class="caption">TOOLBAR POPUP · 254 PX</p><div id="toolbar-demo"></div></section>
+  <p class="page-caption">A visual simulation only. Chrome attaches the real popup to the pinned Momo icon. Timer choices here never close tabs.</p>
+  <section class="audio-check" aria-label="Audio diagnostics">
+    <h2>Sound check</h2>
+    <p id="audio-status" role="status">Use a scenario or Settings → Preview sound.</p>
+    <p>Actual bundled audio, without simulated playback:</p>
+    <audio controls preload="metadata" src="../assets/taps.wav" aria-label="Listed-site tapping sound"></audio>
+    <audio controls preload="metadata" src="../assets/gentle.wav" aria-label="Gentle study chime"></audio>
+  </section>
+  <script src="../src/quotes.js"></script>
+  <script src="../src/audio.js"></script>
+  <script src="../src/mascot.js"></script>
+  <script src="../src/companion.js"></script>
+  <script src="preview.js"></script>
+</body>
+</html>
