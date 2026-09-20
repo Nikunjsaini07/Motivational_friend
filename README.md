@@ -1,143 +1,92 @@
-# Motivation Friend 
+# Motivation Friend
 
-A compact, black Chrome extension with a local animated cat, sourced quotations,
-automatic reminders and optional-by-selection tab-closing commitments.
-JavaScript + HTML + CSS + SVG; no build step, account, API key or dependencies.
+A small Chrome extension that keeps you focused with a cute accountability mascot.
 
-## Install / update
+## What it does
 
-1. Download or clone this project. If downloaded as a ZIP, extract it first.
-2. In Chrome 127 or newer, open `chrome://extensions` and enable **Developer mode**.
-3. Click **Load unpacked** and select the folder containing `manifest.json`.
-4. Pin Motivation Friend from Chrome's puzzle-piece menu.
-5. Visit a normal website. The first reminder is due after two minutes, even if you switch to another app.
+- Waits **2 minutes** after you enter a website.
+- Shows a motivational quote and a question.
+- Uses a cute mascot, tapping animation, and sound to catch your attention.
+- Reopens an unanswered reminder every **30 seconds**.
+- Works locally—no account, AI, API key, or tracking.
 
-To update an existing installation, replace the project files and click **Reload**
-on the extension's card at `chrome://extensions`. Saved settings are preserved.
-Refresh any tabs that still display an older version's page overlay.
-Open the gear → **Preview sound** to test playback.
+## Distraction sites
 
-Reminders now open the **real native popup attached to the toolbar icon**.
-There is no manual check-in button and no floating page card.
-Chrome closes native popups when focus leaves them; the extension cannot keep them
-attached and permanently open. A coral “!” badge means a reminder is waiting for
-your answer, not that the extension is broken. If automatic opening fails, click
-the pinned icon. Opening failure is shown in Settings/the popup.
-Chrome's support and normal popup behavior:
-[Action API](https://developer.chrome.com/docs/extensions/reference/api/action).
+Default list:
 
-## What happens
+- Instagram
+- X / Twitter
+- Facebook
+- Reddit
+- TikTok
+- Snapchat
 
-- Defaults: instagram.com, x.com, twitter.com, facebook.com, reddit.com,
-  tiktok.com and snapchat.com. Subdomains match; lookalike names do not.
-  **YouTube is not listed.**
-- Enter either zone → first reminder after two minutes.
-  Switching tabs or sites within the same zone keeps the session.
-- Listed site → attributed quote, cute-angry Momo, and **1 / 2 / 3 / 4 / 5 / 10 min**.
-  An ignored displayed prompt gets firmer after about 18 seconds.
-- Non-listed → gentle quote and “Are you studying right now?”
-  Yes → supportive reminder two minutes later; No → firmer reminder two minutes later.
-  Non-listed countdown choices remain reminders, not permission to close that site.
-- Study reminder → snooze 20 / 30 / 40 minutes or keep checking every two minutes.
-  Snooze stays silent. Entering a listed zone cancels study snooze and starts a fresh entry.
-- Switching apps or minimizing Chrome does not pause reminders or timers.
-  Browser-internal pages are still not study/distraction websites.
-  Snooze remains wall-clock time and stays silent until its deadline.
-  The extension trusts your answer; it does not inspect page content to prove you are studying.
+On a listed site:
 
-## Important: closing commitments
+- The mascot gives a direct distraction reminder.
+- Choose **1, 2, 3, 4, 5, or 10 minutes** to leave.
+- When the timer ends, the extension closes **all listed-site tabs**, including pinned tabs.
+- You can cancel the closing timer from **Settings**.
 
-**Choosing a time on a listed-site reminder schedules automatic closure of ALL listed
-tabs in every window of this browser profile, including pinned tabs. Unsaved work
-can be lost.** Selecting a duration on a non-listed site never authorizes tab closure.
+> Save unfinished work before choosing a timer. Closed tabs may contain unsaved work.
 
-The closing timer survives tab changes, study snooze, lost focus and worker restarts.
-Missing alarms are rebuilt. If Chrome/computer is closed or asleep, an overdue
-commitment is processed when the extension next runs; exact-time execution is not guaranteed.
-Cancel any time before expiry using **gear → Cancel tab-closing timer**.
+## Other sites
 
-The domain scope is captured when you choose a time. Newly added domains do not
-expand that commitment; removed domains are excluded. Current URLs are rechecked
-before closure, including pending navigation. Non-listed tabs are never targeted.
-There remains an unavoidable tiny race between Chrome's URL check and its tab-remove API.
-A commitment is consumed before removal, so a crash will not replay a destructive
-batch against newly opened tabs. A crash or individual API failure may leave some tabs open.
-There is no repeated close attempt. Normal Chrome reopening may recover closed tabs,
-but cannot guarantee recovery of unsaved work.
+- The mascot gently asks: **“Are you studying right now?”**
+- **Yes, I am** → another supportive check after 2 minutes.
+- **Not really** → a firmer accountability check after 2 minutes.
+- Study reminders can be snoozed for **20, 30, or 40 minutes**.
+- Non-listed tabs are never closed by the extension.
 
-Existing pre-0.3 timers never acquire closing permission automatically.
+## How to install
 
-## Settings and attention cues
+1. Download or clone this repository.
+2. Extract the ZIP if needed.
+3. Open `chrome://extensions` in Chrome 127 or newer.
+4. Enable **Developer mode**.
+5. Click **Load unpacked**.
+6. Select the folder containing `manifest.json`.
+7. Pin **Motivation Friend** from Chrome’s extensions menu.
 
-The tiny gear opens a separate view for Momo's name, listed domains, sound toggle,
-sound preview and cancellation. The main card stays just quote, author, cat and question.
-Width: 254 CSS px (65% of the original 390px design).
-Settings has a stable 520px height, one scroll surface, and an expandable site list.
-Sound controls stay above the list; audio errors stay next to those controls.
-The panel never derives its height from the native popup viewport.
+## How to use
 
-Three clearly audible, short taps match the paw animation. Non-listed study cues add
-a brief chime. Both sounds are original, bundled WAV files generated locally by
-assets/build-audio.cjs; no remote music, network calls or copyrighted recordings.
-Mute persists and stops pending audio. Reduced-motion preferences suppress animation.
-Playback is only acknowledged after media playback starts. Failed automatic attempts
-are retried with a limit; polling and reopening a successfully played prompt do not
-repeat its sound. An Enable sound button appears only when playback needs attention.
-Preview sound plays directly in the popup, preserving your click's audio permission.
-Automatic audio does not depend on the popup successfully opening, so unfocused
-Chrome can still give an audible reminder. Chrome may refuse to open its native
-toolbar popup while another app is active; the badge remains and the pending popup
-can be retried when focus returns. The extension cannot overlay another app.
-Snooze selection does not play a cue. System mute, output-device settings or browser
-audio policy can still prevent audible output. Check Chrome in your system volume
-mixer if playback reports success but your speakers remain silent.
-[Offscreen audio API](https://developer.chrome.com/docs/extensions/reference/api/offscreen).
+- Browse normally—the first reminder appears after 2 minutes.
+- Answer the question or choose a timer.
+- Click the gear icon to open Settings.
+- Use **Preview sound** to test the attention sound.
+- A coral **!** badge means a reminder is waiting.
+- If the popup closes, it will try to reopen after 30 seconds.
 
-## Quotations
+## Settings
 
-16 short public-domain excerpts from Benjamin Franklin, Epictetus, Marcus Aurelius,
-Ralph Waldo Emerson and William Shakespeare. Every entry retains author, work,
-source URL and translation where applicable. Click the author's name to inspect its source.
-Franklin's eighteenth-century capitalization is lightly normalized where noted.
-Shakespeare's line is identified as dialogue from Richard II, not a personal statement.
-Momo's original teasing messages are separate and never attributed to a historical author.
-A recent-six exclusion follows the session across zone changes to reduce repetition.
-All text is bundled locally; source pages are opened only when you click.
+- Change the mascot’s name.
+- Add or remove distraction sites.
+- Turn reminder sounds on or off.
+- Preview the sound.
+- Cancel an active tab-closing timer.
 
-## Privacy and permissions
+## Important behavior
 
-No login, LLM, telemetry, page-content inspection or stored browsing-history list.
-Settings, current hostname/session, recent quote IDs and an active closing commitment
-are saved in chrome.storage.local. The last close result stores only counts and time.
-No full page URLs are persisted or transmitted.
+- Switching between sites in the same category does not reset the timer.
+- Switching between a distraction site and another site starts a new 2-minute session.
+- Minimizing Chrome or switching apps does not pause timers.
+- Chrome settings, the Chrome Web Store, and other restricted pages are unsupported.
+- Chrome may delay reminders while the computer is asleep or the browser is closed.
+- YouTube is not a distraction site by default.
 
-Permissions: storage (local settings), tabs (hostnames and closing selected-domain tabs),
-alarms (deadlines), offscreen (short audio). No HTTP host permissions or page scripting.
-All pages already open at update work without injection; refresh only removes old injected UI.
+## Privacy
 
-## Troubleshooting
+- No login.
+- No ads or analytics.
+- No browsing history is uploaded.
+- No page content is read.
+- No external server or LLM is used.
+- Settings and active timers stay in Chrome’s local extension storage.
 
-- **No sound:** check the sound toggle in Settings, then click Preview sound.
-  Check Chrome's volume in your system mixer and your selected audio output.
-  Reload the extension after updates. Successful playback does not guarantee
-  audible output if the browser or operating system is muted.
-- **The popup disappeared:** clicking elsewhere dismisses Chrome's native popup.
-  Click the pinned icon to answer the pending reminder.
-- **The badge shows “!”:** a question is waiting for an answer; this is not an error.
-- **Nothing appears on a browser settings page:** open a normal website instead.
-  Unsupported browser pages pause normal session deadlines; switching apps does not.
-- **Settings looks outdated:** reload the extension at `chrome://extensions`,
-  close its popup and reopen it.
-- **A timer ran late:** Chrome alarms may be delayed, especially while the computer
-  is asleep or Chrome is closed. They are not precise real-time timers.
+## Built with
 
-### Unanswered reminders
-
-An unanswered popup is retried every **30 seconds** after dismissal, until you
-answer. While the popup is focused, retries are postponed so you can read or edit
-settings. Selecting a timer or snooze stops these retries. The quote and question
-stay the same, apart from the existing listed-site escalation; successful audio
-is not replayed. Browser restrictions can prevent automatic opening, and Chrome
-may delay alarms. The badge remains available for opening the reminder manually.
-Automatic sound retries are separate from popup retries.
-
+- Manifest V3
+- JavaScript
+- HTML and CSS
+- Local SVG graphics
+- Local WAV sounds
